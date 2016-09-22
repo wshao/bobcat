@@ -36,11 +36,11 @@
           $(scenario).parent().find('button').remove();
           if (!api.isTestQuarantined(testInfo)) {
             $(scenario).parent().append('<button quarantine-action="add"> Add to quarantine </button>').click(function (event) {
-              api.putTestIntoQuarantine(testInfo, 'http://192.168.37.49:8080/quarantines');
+              api.putTestIntoQuarantine(testInfo, 'https://192.168.37.49:8080/quarantines');
             });
           } else {
             $(scenario).parent().append('<button quarantine-action="delete"> Remove from quarantine </button>').click(function (event) {
-              api.removeFromQuarantine(testInfo, 'http://192.168.37.49:8080/quarantines');
+              api.removeFromQuarantine(testInfo, 'https://192.168.37.49:8080/quarantines');
             });
           }
         })
@@ -78,7 +78,7 @@
           url: url,
           data: JSON.stringify(testInfo),
           success: function () {
-            api.loadQuarantinedTests('http://192.168.37.49:8080/quarantines');
+            api.loadQuarantinedTests('https://192.168.37.49:8080/quarantines');
           }
         });
     };
@@ -88,7 +88,7 @@
           type: "DELETE",
           url: url + '?' + $.param({"testClass": testInfo.testClassName, "testMethod": testInfo.testMethodName}),
           success: function () {
-            api.loadQuarantinedTests('http://192.168.37.49:8080/quarantines');
+            api.loadQuarantinedTests('https://192.168.37.49:8080/quarantines');
           }
         });
     };
@@ -116,7 +116,7 @@
   })
 
   $(document).ready(function () {
-    Bobcat.Quarantine().loadQuarantinedTests('http://192.168.37.49:8080/quarantines');
+    Bobcat.Quarantine().loadQuarantinedTests('https://192.168.37.49:8080/quarantines');
   });
 
 })(jQuery);
