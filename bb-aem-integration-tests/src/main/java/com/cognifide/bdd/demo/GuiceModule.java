@@ -22,6 +22,7 @@ package com.cognifide.bdd.demo;
 import com.cognifide.qa.bb.AemClassicModule;
 import com.cognifide.qa.bb.aem.AemCommonModule;
 import com.cognifide.qa.bb.aem.touch.modules.AemTouchUiModule;
+import com.cognifide.qa.bb.bobcat.quarantine.support.QuarantineModule;
 import com.cognifide.qa.bb.cumber.guice.BobcumberModule;
 import com.cognifide.qa.bb.logging.ReporterModule;
 import com.cognifide.qa.bb.modules.CoreModule;
@@ -29,6 +30,7 @@ import com.cognifide.qa.bb.traffic.TrafficModule;
 import com.google.inject.AbstractModule;
 
 public class GuiceModule extends AbstractModule {
+
   @Override
   protected void configure() {
     if (System.getProperty("configuration.paths") == null) {
@@ -41,5 +43,6 @@ public class GuiceModule extends AbstractModule {
     install(new BobcumberModule());
     install(new TrafficModule());
     install(new AemTouchUiModule());
+    install(new QuarantineModule());
   }
 }

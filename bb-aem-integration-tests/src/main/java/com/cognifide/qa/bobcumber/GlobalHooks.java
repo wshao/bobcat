@@ -32,6 +32,12 @@ import com.google.inject.Inject;
 
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
+import cucumber.api.java.Before;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Container for methods fired up before and after Cucumber scenarios.
@@ -41,8 +47,14 @@ public class GlobalHooks {
   @Inject
   private WebDriver webDriver;
 
+  private volatile boolean jsInjected;
+
   @Inject
   private BrowserLogEntryCollector browserLogEntryCollector;
+
+  @Before
+  public void before(Scenario scenario) {
+  }
 
   @After
   public void afterScenario(Scenario scenario) {
@@ -52,9 +64,31 @@ public class GlobalHooks {
       }
       addPageLink(scenario);
       addJSConsoleErrors(scenario);
+      if (!jsInjected) {
+        synchronized (this) {
+          try {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(ClassLoader.getSystemResourceAsStream("jquery-1.8.2.min.js"), writer, "utf-8");
+            String jQuery = writer.toString();
+            scenario.write("<script type='text/javascript'>");
+            scenario.write(jQuery);
+            scenario.write("</script>");
+            writer.flush();
+            IOUtils.copy(ClassLoader.getSystemResourceAsStream("quarantine.js"), writer, "utf-8");
+            String js = writer.toString();
+            scenario.write("<script type='text/javascript'>");
+            scenario.write(js);
+            scenario.write("</script>");
+            jsInjected = true;
+          } catch (IOException ex) {
+            Logger.getLogger(GlobalHooks.class.getName()).log(Level.SEVERE, null, ex);
+          }
+        }
+      }
     }
 
     webDriver.quit();
+
   }
 
   private void addJSConsoleErrors(Scenario scenario) {

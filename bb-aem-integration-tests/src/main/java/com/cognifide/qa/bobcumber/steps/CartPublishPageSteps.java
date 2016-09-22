@@ -37,7 +37,7 @@ public class CartPublishPageSteps {
 
   @Then("^cart page is displayed$")
   public void cartPageIsDisplayed() {
-    assertTrue(cartPage.isDisplayed());
+    assertTrue(false);
   }
 
   @And("^recommendations are loaded$")

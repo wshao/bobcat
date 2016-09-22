@@ -51,18 +51,21 @@ public class OrderTest {
 
   @Test
   public void goToProductPage() {
-    menPage.open();
+   /* menPage.open();
     assertTrue(menPage.isDisplayed());
     menPage.clickAshantiNomadLink();
-    assertTrue(productPage.isDisplayed());
+    assertTrue(productPage.isDisplayed());*/
+    assertTrue(false);
   }
 
   @Test
   public void addToCart() {
-    productPage.open();
+  /*  productPage.open();
     assertTrue(productPage.isDisplayed());
     productPage.addToCart();
-    assertTrue(cartPage.isDisplayed());
+    assertTrue(cartPage.isDisplayed());*/
+        assertTrue(false);
+
   }
 
   @Test

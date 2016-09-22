@@ -51,6 +51,7 @@ limitations under the License.
         <module>bb-aem-classic</module>
         <module>bb-aem-touch-ui</module>
         <module>bb-annotations</module>
+        <module>bobcat-quarantine-support</module>
     </modules>
 
     <distributionManagement>
