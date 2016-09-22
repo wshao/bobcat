@@ -40,7 +40,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 /**
  * Container for methods fired up before and after Cucumber scenarios.
  */
@@ -51,7 +50,7 @@ public class GlobalHooks {
   @Inject
   private WebDriver webDriver;
 
-  private final AtomicBoolean quarantineAlreadyInjected;
+  private static final AtomicBoolean quarantineAlreadyInjected = new AtomicBoolean(false);
 
   @Inject
   @Named("quarantine.location")
@@ -61,16 +60,12 @@ public class GlobalHooks {
   @Named("quarantine.location.prefix")
   private String quarantineLocationPrefix;
 
-  @Inject
-  @Named("quarantine.eanbled")
+  @Inject(optional = true)
+  @Named("quarantine.enabled")
   private boolean quarantineEnabled;
 
   @Inject
   private BrowserLogEntryCollector browserLogEntryCollector;
-
-  public GlobalHooks() {
-    this.quarantineAlreadyInjected = new AtomicBoolean(false);
-  }
 
   @After
   public void afterScenario(Scenario scenario) {
