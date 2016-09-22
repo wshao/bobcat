@@ -17,43 +17,59 @@
  * limitations under the License.
  * #L%
  */
-package com.cognifide.qa.bobcumber;
-
-import java.util.List;
+package com.cognifide.qa.bb.bobcat.quarantine.support;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cognifide.qa.bb.logging.BrowserLogEntryCollector;
 import com.cognifide.qa.bb.logging.entries.BrowserLogEntry;
 import com.cognifide.qa.bb.logging.entries.LogEntry;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
-import cucumber.api.java.Before;
+
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * Container for methods fired up before and after Cucumber scenarios.
  */
 public class GlobalHooks {
 
+  private static final Logger LOG = LoggerFactory.getLogger(GlobalHooks.class);
+
   @Inject
   private WebDriver webDriver;
 
-  private volatile boolean jsInjected;
+  private final AtomicBoolean quarantineAlreadyInjected;
+
+  @Inject
+  @Named("quarantine.location")
+  private String quarantineLocation;
+
+  @Inject
+  @Named("quarantine.location.prefix")
+  private String quarantineLocationPrefix;
+
+  @Inject
+  @Named("quarantine.eanbled")
+  private boolean quarantineEnabled;
 
   @Inject
   private BrowserLogEntryCollector browserLogEntryCollector;
 
-  @Before
-  public void before(Scenario scenario) {
+  public GlobalHooks() {
+    this.quarantineAlreadyInjected = new AtomicBoolean(false);
   }
 
   @After
@@ -64,33 +80,38 @@ public class GlobalHooks {
       }
       addPageLink(scenario);
       addJSConsoleErrors(scenario);
-      if (!jsInjected) {
-        synchronized (this) {
-          try {
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(ClassLoader.getSystemResourceAsStream("jquery-1.8.2.min.js"), writer, "utf-8");
-            String jQuery = writer.toString();
-            scenario.write("<script type='text/javascript'>");
-            scenario.write(jQuery);
-            scenario.write("</script>");
-            writer.flush();
-            writer.close();
-            writer = new StringWriter();
-            IOUtils.copy(ClassLoader.getSystemResourceAsStream("quarantine.js"), writer, "utf-8");
-            String js = writer.toString();
-            scenario.write("<script type='text/javascript'>");
-            scenario.write(js);
-            scenario.write("</script>");
-            jsInjected = true;
-          } catch (IOException ex) {
-            Logger.getLogger(GlobalHooks.class.getName()).log(Level.SEVERE, null, ex);
-          }
-        }
-      }
     }
-
+    if (quarantineEnabled && quarantineAlreadyInjected.compareAndSet(false, true)) {
+      includeQuarantineLogic(scenario);
+    }
     webDriver.quit();
 
+  }
+
+  private void includeQuarantineLogic(Scenario scenario) {
+    try {
+      includeJsScript(scenario, getScriptBody("jquery-1.8.2.min.js"));
+      String quarantineJs = getScriptBody("quarantine.js").
+        replace("<#serviceUrl>", quarantineLocation + "/" + quarantineLocationPrefix);
+      includeJsScript(scenario, quarantineJs);
+    } catch (IOException ex) {
+      LOG.error(ex.getMessage(), ex);
+    }
+  }
+
+  private void includeJsScript(Scenario scenario, String scriptBody) throws IOException {
+    scenario.write("<script type='text/javascript'>");
+    scenario.write(scriptBody);
+    scenario.write("</script>");
+  }
+
+  private String getScriptBody(String filePath) throws IOException {
+    String result;
+    try (StringWriter writer = new StringWriter()) {
+      IOUtils.copy(ClassLoader.getSystemResourceAsStream(filePath), writer, "utf-8");
+      result = writer.toString();
+    }
+    return result;
   }
 
   private void addJSConsoleErrors(Scenario scenario) {
