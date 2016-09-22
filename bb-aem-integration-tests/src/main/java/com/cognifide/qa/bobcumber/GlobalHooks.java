@@ -74,6 +74,8 @@ public class GlobalHooks {
             scenario.write(jQuery);
             scenario.write("</script>");
             writer.flush();
+            writer.close();
+            writer = new StringWriter();
             IOUtils.copy(ClassLoader.getSystemResourceAsStream("quarantine.js"), writer, "utf-8");
             String js = writer.toString();
             scenario.write("<script type='text/javascript'>");
