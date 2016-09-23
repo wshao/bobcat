@@ -49,7 +49,8 @@ public class PagePoc implements Page {
     webDriver.get(pageObject.toString());
   }
 
-  @Override public void finish() {
+  @Override
+  public void finish() {
     webDriver.close();
   }
 }

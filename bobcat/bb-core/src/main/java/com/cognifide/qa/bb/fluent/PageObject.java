@@ -1,8 +1,7 @@
 package com.cognifide.qa.bb.fluent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PageObject {
 
@@ -12,26 +11,17 @@ public class PageObject {
 
   private String path = "";
 
-  private List<Query> queryList = new ArrayList<>();
-
-  public List<Query> getQueryList() {
-    return queryList;
-  }
-
-  public void setQueryList(List<Query> queryList) {
-    this.queryList = queryList;
-  }
+  private Map<String, String> queries = new HashMap<>();
 
   PageObject() {
   }
 
-  PageObject(String address, String protocol, String path, Query... queryList) {
+  PageObject(String address, String protocol, String path, Map<String, String> queries) {
     this.address = address;
     this.protocol = protocol;
     this.path = path;
-    Arrays.asList(queryList).forEach(e -> this.queryList.add(e));
+    this.queries = queries;
   }
-
 
   public String getAddress() {
     return address;
@@ -59,17 +49,33 @@ public class PageObject {
 
   //TODO - should check if key already exists and add that query
   public void addQuery(String key, String value) {
-    queryList.add(Query.of(key, value));
+    if (queries.containsKey(key)) {
+      String currentValue = queries.get(key);
+      queries.put(key, currentValue + "," + value);
+    } else {
+      queries.put(key, value);
+    }
   }
 
   @Override
   public String toString() {
     String path = this.path.startsWith("/") ? this.path : "/" + this.path;
-    String queries = anyQuery(queryList) ? "?" + QueryUtils.toString(queryList) : "";
+    String queries = anyQuery() ? "?" + queriesAsString() : "";
     return protocol + "://" + address + path + queries;
   }
 
-  private boolean anyQuery(List<Query> queries) {
+  private boolean anyQuery() {
     return queries != null && !queries.isEmpty();
+  }
+
+  private String queriesAsString() {
+    StringBuilder stringBuilder = new StringBuilder();
+    queries.forEach((k, v) -> {
+      stringBuilder.append(k);
+      stringBuilder.append("=");
+      stringBuilder.append(v);
+      stringBuilder.append("&");
+    });
+    return stringBuilder.substring(0, stringBuilder.length() - 1);
   }
 }

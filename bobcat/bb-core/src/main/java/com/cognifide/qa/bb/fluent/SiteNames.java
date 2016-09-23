@@ -10,10 +10,13 @@ public class SiteNames {
   private static final Map<String, PageObject> names;
 
   static {
-    PageObject wikipediaPage = new PageObject("pl.wikipedia.org", "https", StringUtils.EMPTY);
-    PageObject onetPage = new PageObject("onet.pl", "http", StringUtils.EMPTY);
-    PageObject bobcatPage = new PageObject("github.com", "https", "Cognifide/bobcat");
-    PageObject absaSearchPage = new PageObject("absa.co.za", "https", "search-results/", Query.of("q", "absa"));
+    PageObject wikipediaPage = new PageObject("pl.wikipedia.org", "https", StringUtils.EMPTY, null);
+    PageObject onetPage = new PageObject("onet.pl", "http", StringUtils.EMPTY, null);
+    PageObject bobcatPage = new PageObject("github.com", "https", "Cognifide/bobcat", null);
+
+    Map<String, String> absaQueries = new HashMap<>();
+    absaQueries.put("q", "absa");
+    PageObject absaSearchPage = new PageObject("absa.co.za", "https", "search-results/", absaQueries);
 
     names = new HashMap<>();
     names.put("wikipedia", wikipediaPage);
