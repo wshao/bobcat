@@ -38,7 +38,6 @@ import cucumber.api.java.After;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Container for methods fired up before and after Cucumber scenarios.
@@ -50,7 +49,8 @@ public class GlobalHooks {
   @Inject
   private WebDriver webDriver;
 
-  private static final AtomicBoolean quarantineAlreadyInjected = new AtomicBoolean(false);
+  @Inject
+  private CucumberFeatureJsInclusionTracker tracker;
 
   @Inject
   @Named("quarantine.location")
@@ -76,11 +76,17 @@ public class GlobalHooks {
       addPageLink(scenario);
       addJSConsoleErrors(scenario);
     }
-    if (quarantineEnabled && quarantineAlreadyInjected.compareAndSet(false, true)) {
+    String featureName = getFeatureName(scenario);
+    if (quarantineEnabled && !tracker.featureHasJsIncluded(featureName)) {
       includeQuarantineLogic(scenario);
+      tracker.setFeatureHasJsIncluded(featureName);
     }
     webDriver.quit();
 
+  }
+
+  private String getFeatureName(Scenario scenario) {
+    return scenario.getId().split(";")[0];
   }
 
   private void includeQuarantineLogic(Scenario scenario) {
